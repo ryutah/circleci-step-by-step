@@ -1,6 +1,7 @@
 version: 2
 jobs:
   jdk-8:
+    working_directory: ~/circleci-step-by-step
     docker:
       - image: circleci/openjdk:8-jdk-browsers
       - image: circleci/postgres:9.6-alpine
@@ -13,6 +14,13 @@ jobs:
       - run:
           name: Wait for DB
           command: dockerize -wait tcp://127.0.0.1:5432 -timeout 120s
+
+      - run: mvn dependency:go-offline
+      - run: mvn package
+      - store_test_results:
+          path: target/surefire-reports
+      - store_artifacts:
+          path: target/demo-java-spring-0.0.1-SNAPSHOT.jar
 
   jdk-10:
     docker:
@@ -28,6 +36,13 @@ jobs:
           name: Wait for DB
           command: dockerize -wait tcp://127.0.0.1:5432 -timeout 120s
 
+      - run: mvn dependency:go-offline
+      - run: mvn package
+      - store_test_results:
+          path: target/surefire-reports
+      - store_artifacts:
+          path: target/demo-java-spring-0.0.1-SNAPSHOT.jar
+
   jdk-11:
     docker:
       - image: circleci/openjdk:11-jdk-browsers
@@ -42,14 +57,17 @@ jobs:
           name: Wait for DB
           command: dockerize -wait tcp://127.0.0.1:5432 -timeout 120s
 
+      - run: mvn dependency:go-offline
+      - run: mvn package
+      - store_test_results:
+          path: target/surefire-reports
+      - store_artifacts:
+          path: target/demo-java-spring-0.0.1-SNAPSHOT.jar
+
 workflows:
   version: 2
   build:
     jobs:
       - "jdk-8"
-      - "jdk-10":
-          requires:
-            - "jdk-8"
-      - "jdk-11":
-          requires:
-            - "jdk-8"
+      - "jdk-10"
+      - "jdk-11"
